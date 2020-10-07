@@ -1,0 +1,44 @@
+import pandas as pd
+import numpy as np
+import sklearn as sk
+train_data = pd.read_csv(r'../input/sentiment-analysis/train_2kmZucJ.csv')
+print(np.shape(train_data))
+pd.set_option("display.max_rows",None)
+pd.set_option("display.max_columns", None)
+#print(train_data[:3].head(10))
+test_data = pd.read_csv(r'../input/sentiment-analysis/test_oJQbWVk.csv')
+print(np.shape(test_data))
+#print(test_data.head(20))
+#train_data['label'] = train_data['Computer Science'].astype(str) + train_data['Physics'].astype(str) + train_data['Mathematics'].astype(str) +train_data['Statistics'].astype(str) +  train_data['Quantitative Biology'].astype(str) +train_data['Quantitative Finance'].astype(str)
+
+#print(train_data['label'])
+
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(train_data['tweet'], train_data['label'], random_state=1)
+#print(y_train)
+
+from sklearn.feature_extraction.text import CountVectorizer
+cv = CountVectorizer(strip_accents='ascii', token_pattern=u'(?ui)\\b\\w*[a-z]+\\w*\\b', lowercase=True, stop_words='english')
+X_train_cv = cv.fit_transform(X_train)
+X_test_cv = cv.transform(X_test)
+#print(X_train_cv)
+from sklearn.naive_bayes import MultinomialNB
+naive_bayes = MultinomialNB()
+naive_bayes.fit(X_train_cv, y_train)
+predictions = naive_bayes.predict(X_test_cv)
+from sklearn.metrics import accuracy_score, precision_score, recall_score
+print('Accuracy score: ', accuracy_score(y_test, predictions))
+print('Precision score: ', precision_score(y_test, predictions,average='micro'))
+print('Recall score: ', recall_score(y_test, predictions,average='micro'))
+
+#cv1 = CountVectorizer(strip_accents='ascii', token_pattern=u'(?ui)\\b\\w*[a-z]+\\w*\\b', lowercase=True, stop_words='english')
+z_test_cv = cv.transform(test_data['tweet'])
+pred_test = naive_bayes.predict(z_test_cv)
+#print(pred_test)
+type(pred_test)
+df = pd.DataFrame(data =pred_test)
+test_data['label'] = df
+print(test_data.head(20))
+test_data= test_data.drop(columns=['tweet'])
+#print(test_data.head(20))
+test_data.to_csv(r'D:\Sambita\hackathon-ideathon\Analytics Vidhya\Identifying sentiments\submission1.csv',index=False)
